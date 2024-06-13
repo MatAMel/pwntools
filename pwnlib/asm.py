@@ -217,10 +217,17 @@ def which_binutils(util, check_version=False):
                 patterns = ['%s*linux*-%s' % (arch, gutil),
                             '%s*-elf-%s' % (arch, gutil),
                             '%s-none*-%s' % (arch, gutil),
-                            '%s-%s' % (arch, gutil)]
+                            '%s-%s' % (arch, gutil),
+                            '%s.exe' % (gutil)]
+            
+            # windows uses ';' as seperator
+            if os.name == 'nt':
+                paths = environ['PATH'].split(';')
+            else:
+                paths = environ['PATH'].split(':')
 
             for pattern in patterns:
-                for dir in environ['PATH'].split(':'):
+                for dir in paths:
                     for res in sorted(glob(path.join(dir, pattern))):
                         if check_version:
                             ver = check_binutils_version(res)
@@ -464,9 +471,10 @@ def cpp(shellcode):
         '-nostdinc',
         '-undef',
         '-P',
-        '-I' + _incdir,
-        '/dev/stdin'
+        '-I' + _incdir
     ]
+    if os.name != 'nt':
+        cmd.append('/dev/stdin')
     return _run(cmd, code).strip('\n').rstrip() + '\n'
 
 
